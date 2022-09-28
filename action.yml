@@ -1,9 +1,6 @@
-name: "Debug APK Publisher"
-branding:
-  icon: "package"
-  color: "red"
-description: "Build & Publish Debug APK on Github"
-author: "ShaunLWM"
+name: "Release APK Publisher"
+description: "Build & Publish Release APK on Github"
+author: "hacker-jak"
 inputs:
   GITHUB_TOKEN:
     required: true
@@ -14,12 +11,13 @@ inputs:
 runs:
   using: "docker"
   image: "Dockerfile"
-name: Build & Publish Debug APK
+name: Build & Publish Release APK
 
 on:
  push:
   branches:
-   - master
+   - wg_app
+ workflow_dispatch:
    
 jobs:
   build:
@@ -31,14 +29,18 @@ jobs:
       with:
         java-version: 1.8
     - name: Make Gradle executable
-      run: chmod +x ./gradlew
+      run: chmod +x ./${GITHUB_WORKSPACE}/endpoint/app/gradlew
     - name: Build with Gradle
-      run: ./gradlew build
-    - name: Build Debug APK
-      run: ./gradlew assembleDebug
+      run: ./${GITHUB_WORKSPACE}/endpoint/app/gradlew build
+    - name: Build Release APK
+      run: ./${GITHUB_WORKSPACE}/endpoint/app/gradlew assembleRelease
+      env:
+        KEYSTORE_PATH: ${GITHUB_WORKSPACE}/endpoint/app/app/build/jata_keystore.jks
+        KEYPASS: ${{ secrets.KEYPASS }}
     - name: Releasing using Hub
-      uses: ShaunLWM/action-release-debugapk@master
+      uses: hacker-jak/action-release-apk@master
       env:
        GITHUB_TOKEN: ${{ secrets.TOKEN }}
-       APP_FOLDER: app
-       RELEASE_TITLE: New Build
+       APP_FOLDER: ${GITHUB_WORKSPACE}/endpoint/app/app/build/outputs/apk/release
+       RELEASE_TITLE: Latest Release Build
+
