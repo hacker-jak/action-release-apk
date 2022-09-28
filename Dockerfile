@@ -1,4 +1,4 @@
-FROM debian:10.1
+FROM debian:stable
 
 RUN apt update \
 	&& apt -y upgrade \
